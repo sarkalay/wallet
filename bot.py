@@ -6,28 +6,28 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Configuration for Ethereum (using Alchemy)
-eth_alchemy_url = os.getenv('ETH_ALCHEMY_URL')  # e.g., https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY
-eth_private_key = os.getenv('ETH_PRIVATE_KEY')  # Ethereum sender wallet private key
-eth_sender_address = os.getenv('ETH_SENDER_ADDRESS')  # Ethereum sender wallet address
-eth_receiver_address = os.getenv('ETH_RECEIVER_ADDRESS')  # Ethereum cold storage address
+# Configuration for Sepolia Testnet (using Alchemy)
+eth_alchemy_url = os.getenv('ETH_ALCHEMY_URL')  # e.g., https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY
+eth_private_key = os.getenv('ETH_PRIVATE_KEY')  # Testnet Ethereum sender wallet private key
+eth_sender_address = os.getenv('ETH_SENDER_ADDRESS')  # Testnet Ethereum sender wallet address
+eth_receiver_address = os.getenv('ETH_RECEIVER_ADDRESS')  # Testnet Ethereum cold storage address
 
-# Configuration for BNB Chain
-bnb_rpc_url = os.getenv('BNB_RPC_URL')  # e.g., https://bsc-dataseed.binance.org/
-bnb_private_key = os.getenv('BNB_PRIVATE_KEY')  # BNB sender wallet private key
-bnb_sender_address = os.getenv('BNB_SENDER_ADDRESS')  # BNB sender wallet address
-bnb_receiver_address = os.getenv('BNB_RECEIVER_ADDRESS')  # BNB cold storage address
+# Configuration for BNB Testnet
+bnb_rpc_url = os.getenv('BNB_RPC_URL')  # e.g., https://data-seed-prebsc-1-s1.binance.org:8545/
+bnb_private_key = os.getenv('BNB_PRIVATE_KEY')  # Testnet BNB sender wallet private key
+bnb_sender_address = os.getenv('BNB_SENDER_ADDRESS')  # Testnet BNB sender wallet address
+bnb_receiver_address = os.getenv('BNB_RECEIVER_ADDRESS')  # Testnet BNB cold storage address
 
-# Connect to Ethereum (Alchemy) and BNB Chain nodes
+# Connect to Sepolia Testnet (Alchemy) and BNB Testnet nodes
 w3_eth = Web3(Web3.HTTPProvider(eth_alchemy_url))
 w3_bnb = Web3(Web3.HTTPProvider(bnb_rpc_url))
 
 # Check connections
 if not w3_eth.is_connected():
-    print("Failed to connect to Ethereum node (Alchemy)")
+    print("Failed to connect to Sepolia Testnet node (Alchemy)")
     exit()
 if not w3_bnb.is_connected():
-    print("Failed to connect to BNB Chain node")
+    print("Failed to connect to BNB Testnet node")
     exit()
 
 # Gas settings
@@ -64,7 +64,7 @@ def transfer_funds(w3, private_key, sender_address, receiver_address, chain_name
             'value': amount_to_transfer,
             'gas': GAS_LIMIT,
             'gasPrice': gas_price,
-            'chainId': chain_id  # 1 for Ethereum Mainnet, 56 for BNB Chain
+            'chainId': chain_id  # 11155111 for Sepolia Testnet, 97 for BNB Testnet
         }
         
         # Sign transaction
@@ -83,7 +83,7 @@ def transfer_funds(w3, private_key, sender_address, receiver_address, chain_name
         print(f"Error on {chain_name}: {e}")
         return False, None
 
-# Check and transfer for Ethereum
+# Check and transfer for Sepolia Testnet
 def check_and_transfer_eth():
     global last_balance_eth
     try:
@@ -91,18 +91,18 @@ def check_and_transfer_eth():
         
         # Check if balance has increased (new deposit)
         if current_balance > last_balance_eth:
-            print(f"New ETH deposit detected! Current balance: {w3_eth.from_wei(current_balance, 'ether')} ETH")
-            success, new_balance = transfer_funds(w3_eth, eth_private_key, eth_sender_address, eth_receiver_address, "Ethereum", 1)
+            print(f"New ETH deposit detected on Sepolia Testnet! Current balance: {w3_eth.from_wei(current_balance, 'ether')} ETH")
+            success, new_balance = transfer_funds(w3_eth, eth_private_key, eth_sender_address, eth_receiver_address, "Sepolia Testnet", 11155111)
             if success:
                 last_balance_eth = new_balance
         else:
-            print("No new ETH deposits detected")
+            print("No new ETH deposits detected on Sepolia Testnet")
         
         last_balance_eth = current_balance
     except Exception as e:
-        print(f"Ethereum error: {e}")
+        print(f"Sepolia Testnet error: {e}")
 
-# Check and transfer for BNB Chain
+# Check and transfer for BNB Testnet
 def check_and_transfer_bnb():
     global last_balance_bnb
     try:
@@ -110,20 +110,20 @@ def check_and_transfer_bnb():
         
         # Check if balance has increased (new deposit)
         if current_balance > last_balance_bnb:
-            print(f"New BNB deposit detected! Current balance: {w3_bnb.from_wei(current_balance, 'ether')} BNB")
-            success, new_balance = transfer_funds(w3_bnb, bnb_private_key, bnb_sender_address, bnb_receiver_address, "BNB Chain", 56)
+            print(f"New BNB deposit detected on BNB Testnet! Current balance: {w3_bnb.from_wei(current_balance, 'ether')} BNB")
+            success, new_balance = transfer_funds(w3_bnb, bnb_private_key, bnb_sender_address, bnb_receiver_address, "BNB Testnet", 97)
             if success:
                 last_balance_bnb = new_balance
         else:
-            print("No new BNB deposits detected")
+            print("No new BNB deposits detected on BNB Testnet")
         
         last_balance_bnb = current_balance
     except Exception as e:
-        print(f"BNB Chain error: {e}")
+        print(f"BNB Testnet error: {e}")
 
 # Main loop to check for new deposits
 def main():
-    print("Starting wallet monitoring for Ethereum (Alchemy) and BNB Chain...")
+    print("Starting wallet monitoring for Sepolia Testnet (Alchemy) and BNB Testnet...")
     while True:
         check_and_transfer_eth()
         check_and_transfer_bnb()
