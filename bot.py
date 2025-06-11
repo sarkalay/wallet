@@ -18,24 +18,26 @@ bnb_receiver_address = os.getenv('BNB_RECEIVER_ADDRESS')  # Testnet BNB cold sto
 eth_wallets = {}
 bnb_wallets = {}
 
-# Load Ethereum sender wallets (Auser, Buser, Cuser, etc.)
-for user in ['AUSER', 'BUSER', 'CUSER']:  # Add more users as needed
-    address = os.getenv(f'ETH_SENDER_{user}')
-    private_key = os.getenv(f'ETH_PRIVATE_KEY_{user}')
-    if address and private_key:
-        eth_wallets[address] = private_key
+# Load sender wallets (Auser, Buser, Cuser, etc.)
+sender_users = ['AUSER', 'BUSER', 'CUSER']  # CUSER is optional
+for user in sender_users:
+    # Ethereum sender wallets
+    eth_address = os.getenv(f'ETH_SENDER_{user}')
+    eth_private_key = os.getenv(f'ETH_PRIVATE_KEY_{user}')
+    if eth_address and eth_private_key:
+        eth_wallets[eth_address] = eth_private_key
     else:
-        print(f"Warning: ETH_SENDER_{user} or ETH_PRIVATE_KEY_{user} not found in .env")
+        print(f"Warning: ETH_SENDER_{user} or ETH_PRIVATE_KEY_{user} not found in .env, skipping...")
 
-# Load BNB sender wallets (Auser, Buser, Cuser, etc.)
-for user in ['AUSER', 'BUSER', 'CUSER']:  # Add more users as needed
-    address = os.getenv(f'BNB_SENDER_{user}')
-    private_key = os.getenv(f'BNB_PRIVATE_KEY_{user}')
-    if address and private_key:
-        bnb_wallets[address] = private_key
+    # BNB sender wallets
+    bnb_address = os.getenv(f'BNB_SENDER_{user}')
+    bnb_private_key = os.getenv(f'BNB_PRIVATE_KEY_{user}')
+    if bnb_address and bnb_private_key:
+        bnb_wallets[bnb_address] = bnb_private_key
     else:
-        print(f"Warning: BNB_SENDER_{user} or BNB_PRIVATE_KEY_{user} not found in .env")
+        print(f"Warning: BNB_SENDER_{user} or BNB_PRIVATE_KEY_{user} not found in .env, skipping...")
 
+# Check if at least one wallet is configured
 if not eth_wallets and not bnb_wallets:
     print("Error: No valid sender wallets found in .env file")
     exit()
