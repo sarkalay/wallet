@@ -6,37 +6,42 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Configuration for all blockchains
+# Configuration for all Mainnet blockchains
 configs = {
     'eth': {
-        'rpc_url': os.getenv('ETH_ALCHEMY_URL'),  # e.g., https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY
+        'rpc_url': os.getenv('ETH_ALCHEMY_URL'),  # e.g., https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY
         'receiver_address': os.getenv('ETH_RECEIVER_ADDRESS'),  # Duser
-        'chain_id': 11155111,  # Sepolia Testnet
-        'name': 'Sepolia Testnet'
+        'chain_id': 1,  # Ethereum Mainnet
+        'name': 'Ethereum Mainnet',
+        'gas_limit': int(os.getenv('ETH_GAS_LIMIT', 21000))
     },
     'bnb': {
-        'rpc_url': os.getenv('BNB_RPC_URL'),  # e.g., https://data-seed-prebsc-1-s1.binance.org:8545/
+        'rpc_url': os.getenv('BNB_RPC_URL'),  # e.g., https://bsc-dataseed.binance.org/
         'receiver_address': os.getenv('BNB_RECEIVER_ADDRESS'),  # Duser
-        'chain_id': 97,  # BNB Testnet
-        'name': 'BNB Testnet'
+        'chain_id': 56,  # BNB Chain Mainnet
+        'name': 'BNB Chain Mainnet',
+        'gas_limit': int(os.getenv('BNB_GAS_LIMIT', 21000))
     },
     'base': {
-        'rpc_url': os.getenv('BASE_RPC_URL'),  # e.g., https://sepolia.base.org
+        'rpc_url': os.getenv('BASE_RPC_URL'),  # e.g., https://mainnet.base.org
         'receiver_address': os.getenv('BASE_RECEIVER_ADDRESS'),  # Duser
-        'chain_id': 84532,  # Base Sepolia Testnet
-        'name': 'Base Sepolia Testnet'
+        'chain_id': 8453,  # Base Mainnet
+        'name': 'Base Mainnet',
+        'gas_limit': int(os.getenv('BASE_GAS_LIMIT', 21000))
     },
     'polygon': {
-        'rpc_url': os.getenv('POLYGON_RPC_URL'),  # e.g., https://rpc-mumbai.polygon.technology
+        'rpc_url': os.getenv('POLYGON_RPC_URL'),  # e.g., https://polygon-rpc.com
         'receiver_address': os.getenv('POLYGON_RECEIVER_ADDRESS'),  # Duser
-        'chain_id': 80001,  # Polygon Mumbai Testnet
-        'name': 'Polygon Mumbai Testnet'
+        'chain_id': 137,  # Polygon Mainnet
+        'name': 'Polygon Mainnet',
+        'gas_limit': int(os.getenv('POLYGON_GAS_LIMIT', 21000))
     },
     'arbitrum': {
-        'rpc_url': os.getenv('ARBITRUM_RPC_URL'),  # e.g., https://sepolia-rollup.arbitrum.io/rpc
+        'rpc_url': os.getenv('ARBITRUM_RPC_URL'),  # e.g., https://arb1.arbitrum.io/rpc
         'receiver_address': os.getenv('ARBITRUM_RECEIVER_ADDRESS'),  # Duser
-        'chain_id': 421614,  # Arbitrum Sepolia Testnet
-        'name': 'Arbitrum Sepolia Testnet'
+        'chain_id': 42161,  # Arbitrum One
+        'name': 'Arbitrum One',
+        'gas_limit': int(os.getenv('ARBITRUM_GAS_LIMIT', 21000))
     }
 }
 
@@ -65,7 +70,7 @@ if not any(wallets[chain] for chain in wallets):
     print("Error: No valid sender wallets found in .env file")
     exit()
 
-# Connect to EVM-based blockchains
+# Connect to Mainnet blockchains
 w3_instances = {}
 for chain, config in configs.items():
     w3_instances[chain] = Web3(Web3.HTTPProvider(config['rpc_url']))
@@ -83,9 +88,6 @@ for chain, config in configs.items():
         print(f"Invalid address format for {chain}: {e}")
         exit()
 
-# Gas settings for EVM chains
-GAS_LIMIT = 21000  # Standard gas limit for ETH/BNB/Base/Polygon/Arbitrum transfer
-
 # Track last known balances
 last_balances = {
     chain: {addr: w3_instances[chain].eth.get_balance(addr) for addr in wallets[chain]}
@@ -93,11 +95,11 @@ last_balances = {
 }
 
 # Generic EVM transfer function
-def transfer_funds_evm(w3, private_key, sender_address, receiver_address, chain_name, chain_id):
+def transfer_funds_evm(w3, private_key, sender_address, receiver_address, chain_name, chain_id, gas_limit):
     try:
         current_balance = w3.eth.get_balance(sender_address)
         gas_price = w3.eth.gas_price
-        gas_fee = GAS_LIMIT * gas_price
+        gas_fee = gas_limit * gas_price
         amount_to_transfer = current_balance - gas_fee
         
         if amount_to_transfer <= 0:
@@ -109,7 +111,7 @@ def transfer_funds_evm(w3, private_key, sender_address, receiver_address, chain_
             'nonce': nonce,
             'to': receiver_address,
             'value': amount_to_transfer,
-            'gas': GAS_LIMIT,
+            'gas': gas_limit,
             'gasPrice': gas_price,
             'chainId': chain_id
         }
@@ -118,6 +120,7 @@ def transfer_funds_evm(w3, private_key, sender_address, receiver_address, chain_
         print(f"Transfer sent on {chain_name} from {sender_address}: {tx_hash.hex()}")
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
         print(f"Transfer confirmed on {chain_name} from {sender_address}: {receipt.transactionHash.hex()}")
+        print(f"Gas used: {receipt['gasUsed']}")
         return True, current_balance
     except Exception as e:
         print(f"Error on {chain_name} for {sender_address}: {e}")
@@ -133,7 +136,7 @@ def check_and_transfer_evm(chain):
             current_balance = w3.eth.get_balance(sender_address)
             if current_balance > last_balances[chain][sender_address]:
                 print(f"New deposit detected on {config['name']} for {sender_address}! Current balance: {w3.from_wei(current_balance, 'ether')} {chain.upper()}")
-                success, new_balance = transfer_funds_evm(w3, private_key, sender_address, config['receiver_address'], config['name'], config['chain_id'])
+                success, new_balance = transfer_funds_evm(w3, private_key, sender_address, config['receiver_address'], config['name'], config['chain_id'], config['gas_limit'])
                 if success:
                     last_balances[chain][sender_address] = new_balance
             else:
@@ -144,7 +147,7 @@ def check_and_transfer_evm(chain):
 
 # Main loop
 def main():
-    print("Starting wallet monitoring for multiple blockchains...")
+    print("Starting wallet monitoring for multiple Mainnet blockchains...")
     print(f"Monitoring wallets: ETH({len(wallets['eth'])}), BNB({len(wallets['bnb'])}), Base({len(wallets['base'])}), Polygon({len(wallets['polygon'])}), Arbitrum({len(wallets['arbitrum'])})")
     while True:
         for chain in configs.keys():
