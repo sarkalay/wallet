@@ -55,7 +55,7 @@ wallets = {
 }
 
 # Load sender wallets (Auser, Buser, Cuser optional)
-sender_users = ['AUSER', 'BUSER', 'CUSER']
+sender_users = ['AUSER', 'BUSER', 'CUSER', 'DUSER', 'EUSER', 'FUSER', 'GUSER', 'HUSER']
 for user in sender_users:
     for chain in configs.keys():
         address = os.getenv(f'{chain.upper()}_SENDER_{user}')
