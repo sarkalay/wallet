@@ -137,7 +137,7 @@ def main():
     while True:
         check_and_transfer_eth()
         check_and_transfer_bnb()
-        time.sleep(5)  # Check every 5 seconds
+        time.sleep(7)  # Check every 7 seconds
 
 if __name__ == "__main__":
     main()
