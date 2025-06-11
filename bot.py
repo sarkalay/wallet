@@ -126,12 +126,12 @@ def check_and_transfer_eth():
             
             # Check if balance has increased (new deposit)
             if current_balance > eth_last_balances[sender_address]:
-                print(f"New ETH deposit detected on Sepolia Testnet for {sender_address}! Current balance: {w3_eth.from_wei(current_balance, 'ether')} ETH")
+                print(f"New ETH deposit detected on Ethereum for {sender_address}! Current balance: {w3_eth.from_wei(current_balance, 'ether')} ETH")
                 success, new_balance = transfer_funds(w3_eth, private_key, sender_address, eth_receiver_address, "Ethereum", 1)
                 if success:
                     eth_last_balances[sender_address] = new_balance
             else:
-                print(f"No new ETH deposits detected on Sepolia Testnet for {sender_address}")
+                print(f"No new ETH deposits detected on Ethereum for {sender_address}")
             
             eth_last_balances[sender_address] = current_balance
         except Exception as e:
@@ -151,7 +151,7 @@ def check_and_transfer_bnb():
                 if success:
                     bnb_last_balances[sender_address] = new_balance
             else:
-                print(f"No new BNB deposits detected on BNB Testnet for {sender_address}")
+                print(f"No new BNB deposits detected on BNB Chain for {sender_address}")
             
             bnb_last_balances[sender_address] = current_balance
         except Exception as e:
@@ -159,12 +159,12 @@ def check_and_transfer_bnb():
 
 # Main loop to check for new deposits
 def main():
-    print("Starting wallet monitoring for Sepolia Testnet (Alchemy) and BNB Testnet...")
+    print("Starting wallet monitoring for BnB Chain and BNB ...")
     print(f"Monitoring {len(eth_wallets)} Ethereum wallets and {len(bnb_wallets)} BNB wallets")
     while True:
         check_and_transfer_eth()
         check_and_transfer_bnb()
-        time.sleep(5)  # Check every 5 seconds
+        time.sleep(7)  # Check every 7 seconds
 
 if __name__ == "__main__":
     main()
