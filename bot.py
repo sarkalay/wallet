@@ -30,6 +30,16 @@ if not w3_bnb.is_connected():
     print("Failed to connect to BNB Testnet node")
     exit()
 
+# Convert addresses to checksum format
+try:
+    eth_sender_address = w3_eth.to_checksum_address(eth_sender_address)
+    eth_receiver_address = w3_eth.to_checksum_address(eth_receiver_address)
+    bnb_sender_address = w3_bnb.to_checksum_address(bnb_sender_address)
+    bnb_receiver_address = w3_bnb.to_checksum_address(bnb_receiver_address)
+except ValueError as e:
+    print(f"Invalid address format: {e}")
+    exit()
+
 # Gas settings
 GAS_LIMIT = 21000  # Standard gas limit for ETH/BNB transfer
 
