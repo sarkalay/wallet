@@ -102,7 +102,7 @@ def check_and_transfer_eth():
         # Check if balance has increased (new deposit)
         if current_balance > last_balance_eth:
             print(f"New ETH deposit detected on Sepolia Testnet! Current balance: {w3_eth.from_wei(current_balance, 'ether')} ETH")
-            success, new_balance = transfer_funds(w3_eth, eth_private_key, eth_sender_address, eth_receiver_address, "Sepolia Testnet", 11155111)
+            success, new_balance = transfer_funds(w3_eth, eth_private_key, eth_sender_address, eth_receiver_address, "Ethereum", 1)
             if success:
                 last_balance_eth = new_balance
         else:
@@ -121,7 +121,7 @@ def check_and_transfer_bnb():
         # Check if balance has increased (new deposit)
         if current_balance > last_balance_bnb:
             print(f"New BNB deposit detected on BNB Testnet! Current balance: {w3_bnb.from_wei(current_balance, 'ether')} BNB")
-            success, new_balance = transfer_funds(w3_bnb, bnb_private_key, bnb_sender_address, bnb_receiver_address, "BNB Testnet", 97)
+            success, new_balance = transfer_funds(w3_bnb, bnb_private_key, bnb_sender_address, bnb_receiver_address, "BNB Chain", 56)
             if success:
                 last_balance_bnb = new_balance
         else:
