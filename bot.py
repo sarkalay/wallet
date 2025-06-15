@@ -54,8 +54,16 @@ wallets = {
     'arbitrum': {}
 }
 
-# Load sender wallets (Auser, Buser, Cuser optional)
-sender_users = ['AUSER', 'BUSER', 'CUSER', 'DUSER', 'EUSER', 'FUSER', 'GUSER', 'HUSER']
+# Load sender wallets dynamically from .env
+sender_users = set()  # Use a set to avoid duplicates
+for chain in configs.keys():
+    # Get all environment variables for the chain
+    for key in os.environ.keys():
+        if key.startswith(f'{chain.upper()}_SENDER_'):
+            user = key.replace(f'{chain.upper()}_SENDER_', '')
+            sender_users.add(user)
+
+# Load wallets for each user
 for user in sender_users:
     for chain in configs.keys():
         address = os.getenv(f'{chain.upper()}_SENDER_{user}')
