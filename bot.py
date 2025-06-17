@@ -42,6 +42,13 @@ configs = {
         'chain_id': 42161,  # Arbitrum One
         'name': 'Arbitrum One',
         'gas_limit': int(os.getenv('ARBITRUM_GAS_LIMIT', 21000))
+    },
+    'ink': {
+        'rpc_url': os.getenv('INK_RPC_URL'),  # e.g., https://mainnet.ink-rpc.com
+        'receiver_address': os.getenv('INK_RECEIVER_ADDRESS'),  # Duser
+        'chain_id': 12345,  # Replace with actual Ink Mainnet chain ID
+        'name': 'Ink Mainnet',
+        'gas_limit': int(os.getenv('INK_GAS_LIMIT', 21000))
     }
 }
 
@@ -51,7 +58,8 @@ wallets = {
     'bnb': {},
     'base': {},
     'polygon': {},
-    'arbitrum': {}
+    'arbitrum': {},
+    'ink': {}
 }
 
 # Load sender wallets dynamically from .env
@@ -156,7 +164,7 @@ def check_and_transfer_evm(chain):
 # Main loop
 def main():
     print("Starting wallet monitoring for multiple Mainnet blockchains...")
-    print(f"Monitoring wallets: ETH({len(wallets['eth'])}), BNB({len(wallets['bnb'])}), Base({len(wallets['base'])}), Polygon({len(wallets['polygon'])}), Arbitrum({len(wallets['arbitrum'])})")
+    print(f"Monitoring wallets: ETH({len(wallets['eth'])}), BNB({len(wallets['bnb'])}), Base({len(wallets['base'])}), Polygon({len(wallets['polygon'])}), Arbitrum({len(wallets['arbitrum'])}), Ink({len(wallets['ink'])})")
     while True:
         for chain in configs.keys():
             check_and_transfer_evm(chain)
